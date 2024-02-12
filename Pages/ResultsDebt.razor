@@ -1,0 +1,97 @@
+﻿@using System.Text
+@using System.IO
+
+
+@if (DataRequested != null && string.IsNullOrEmpty(_errorMessage))
+{
+    <RadzenDataGrid Data="@data" TItem="IDictionary<string, string>" ColumnWidth="200px"
+                    GroupPanelText="Header" FilterPopupRenderMode="Radzen.PopupRenderMode.OnDemand"
+                    AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Center" PageSize="15"
+                    AllowColumnResize="true" class="rz-border-radius">
+        <Columns>
+            @foreach (IDictionary<string, string> col in data)
+            {
+                foreach (string key in col.Keys)
+                {
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" Property="@key" Title=@SetTitle(key) TItem="IDictionary<string, string>" Type="typeof(string)">
+                        <Template>
+                            @context[@key]
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+                break;
+            }
+        </Columns>
+    </RadzenDataGrid>
+
+}
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <RadzenText TextStyle="TextStyle.Body2">@_errorMessage</RadzenText>
+}
+
+@code {
+
+    [Parameter]
+    public Dictionary<string, List<string>> DataRequested { get; set; }
+
+    private IEnumerable<IDictionary<string, string>> data = new List<Dictionary<string, string>>();
+
+    private string _errorMessage;
+
+    protected override void OnInitialized()
+    {
+        _errorMessage = null;
+        ListsToItems();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        _errorMessage = null;
+
+        ListsToItems();
+
+        base.OnAfterRender(firstRender);
+    }
+
+    private void ListsToItems()
+    {
+        _errorMessage = null;
+
+        data = new List<Dictionary<string, string>>();
+
+        var result = new List<Dictionary<string, string>>();
+
+        if (DataRequested.ContainsKey("Error"))
+        {
+            DataRequested.TryGetValue("Error", out var values);
+
+            _errorMessage = values?[0];
+        }
+
+        if (DataRequested == null)
+            return;
+        var columns = DataRequested.Keys.ToList();
+        if (columns.Count <= 0)
+            return;
+        var rowsCount = DataRequested[columns[0]].Count;
+
+
+        for (int i = 0; i < rowsCount; i++)
+        {
+            var dic = new Dictionary<string, string>();
+            foreach (string col in columns)
+            {
+                dic.Add(col, DataRequested[col][i]);
+            }
+            result.Add(dic);
+        }
+        data = result.AsEnumerable();
+    }
+
+    private string SetTitle(string id)
+    {
+        return string.Concat(id.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+    }
+}

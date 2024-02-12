@@ -1,0 +1,17 @@
+﻿
+::deep .overlay-layer {
+    height: 60px;
+    background-color: gainsboro;
+    z-index: 0;
+    color: #4340d2;
+    text-align: center;
+    line-height: 60px;
+}
+
+::deep .upload_btn {
+    position: absolute;
+    width: 95%;
+    height: 60px;
+    z-index: 10;
+    opacity: 0;
+}

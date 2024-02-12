@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+
+<RadzenLayout>
+    <RadzenHeader class="rz-background-color-primary-lighter">
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" Gap="0">
+            <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+    <RadzenSidebar class="rz-primary-lighter" @bind-Expanded="@sidebarExpanded">
+        <RadzenPanelMenu class="rz-color-info-light">
+            <RadzenPanelMenuItem class="rz-color-black" Text="Dashboard" Icon="account_balance" Path="/debt-summary" />
+            <RadzenPanelMenuItem class="rz-color-black" Text="Process Debt" Icon="note_add" Path="/process-debt" />
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+
+</RadzenLayout>
+
+@code {
+
+    bool sidebarExpanded = true;
+}
+

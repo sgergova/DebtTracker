@@ -1,0 +1,13 @@
+﻿@page "/"
+@inject NavigationManager _navigationManager
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (_navigationManager.Uri.EndsWith(_navigationManager.BaseUri))
+        {
+            _navigationManager.NavigateTo("/debt-summary");
+        }
+    }
+}

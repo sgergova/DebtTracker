@@ -1,0 +1,82 @@
+﻿@page "/process-debt"
+@inject IFileProcessor _httpClient
+
+
+<div class="rz-p-3">
+    <RadzenCard Style="margin-bottom:0.5rem;">
+        <div>
+            <InputFile class="upload_btn" draggable="true" OnChange="@UploadAsync" />
+            <div>
+                <div class="overlay-layer">
+                    <RadzenText TextStyle="TextStyle.Body2">Upload or drag and drop to upload your file.</RadzenText>
+                    <RadzenIcon Icon="attach_file" />
+                </div>
+            </div>
+        </div>
+    </RadzenCard>
+</div>
+
+
+
+@if (_result != null)
+{
+    <div class="rz-p-3">
+        <RadzenCard Style="margin-bottom:0.5rem;">
+            <div>
+                <ResultsDebt DataRequested="@_result" />
+            </div>
+        </RadzenCard>
+    </div>
+
+}
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <RadzenText TextStyle="TextStyle.Body2">@_errorMessage</RadzenText>
+}
+
+@if (_isLoading)
+{
+    <p>Loading...</p>
+    <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+}
+
+
+@code {
+    private const string _allowedFile = ".txt"; 
+
+    private IBrowserFile _browserFile;
+
+    public Dictionary<string, List<string>> _result;
+
+    private bool _isLoading;
+
+    private string _errorMessage;
+
+    public async Task UploadAsync(InputFileChangeEventArgs e)
+    {
+        _isLoading = true;
+
+        _browserFile = e.File;
+
+        var extensionOfFile = Path.GetExtension(_browserFile.Name);
+
+        if (!_allowedFile.Equals(extensionOfFile.ToLower()))
+        {
+            _errorMessage = "Please make sure you have attached a text file (.txt).";
+            return;
+        }
+        
+        var memoryStream = new MemoryStream();
+
+        await _browserFile.OpenReadStream().CopyToAsync(memoryStream);
+
+        _result = await _httpClient.ProcessDebts(memoryStream.ToArray());
+
+        _isLoading = false;
+
+    }
+
+}
+
+

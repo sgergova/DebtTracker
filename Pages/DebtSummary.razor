@@ -1,0 +1,73 @@
+﻿@page "/debt-summary"
+@inject HttpClient Http
+
+
+<div class="rz-p-3">
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H3">Debts</RadzenText>
+        <RadzenDropDown class="rz-border-color-primary-light" Style="width: 100%; max-width: 300px;" TValue="string" @bind-Value="SelectedId"
+                        Data="@(_debts)" TextProperty="Id" ValueProperty="Id"
+                        Change="@GetDebts" />
+    </RadzenCard>
+
+</div>
+<div class="rz-p-3">
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Debt Details</RadzenText>
+        @if (_selectedDebts != null && _selectedDebts.Any())
+        {
+            <RadzenDataGrid class="rz-border-radius" FilterPopupRenderMode="Radzen.PopupRenderMode.OnDemand"
+                            Data="@(_selectedDebts)" TItem="Debt" ColumnWidth="200px">
+                <Columns>
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" TItem="Debt" Property="CreditorName" Title="Creditor" />
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" TItem="Debt" Property="ClientName" Title="Client" />
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" TItem="Debt" Property="DueDate" Title="Due Date" FormatString="{0:d}" />
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" TItem="Debt" Property="AmountOfDebt" Title="Amount Of Debt" />
+                    <RadzenDataGridColumn HeaderCssClass="rz-background-color-primary-lighter" TItem="Debt" Property="IsOverdue" Title="Is Overdue">
+                        <Template Context="data">
+                            @if (data.IsOverdue)
+                            {
+                                <RadzenIcon Icon="warning" IconColor="@Radzen.Colors.Danger" />
+                                var difference = DateTime.UtcNow - data.DueDate;
+                                var inDays = difference.Days;
+                                <RadzenText TextStyle="TextStyle.Body2">Overdue in days: @inDays</RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenIcon Icon="done" IconColor="@Radzen.Colors.Success" />
+                            }
+
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        }
+        else
+        {
+            <RadzenText TextStyle="TextStyle.Body2">No obligation details to display.</RadzenText>
+        }
+    </RadzenCard>
+</div>
+
+
+
+@code {
+    private List<Debt> _debts = new List<Debt>();
+    private List<Debt> _selectedDebts = new List<Debt>();
+    private string SelectedId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _debts = await Http.GetFromJsonAsync<List<Debt>>("sample-data/debts.json");
+    }
+
+    private void GetDebts(object value)
+    {
+        SelectedId = value?.ToString();
+
+        _selectedDebts = _debts.Where(x => x.Id == SelectedId).ToList();
+    }
+}
+
+
+
